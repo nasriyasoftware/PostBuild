@@ -16,7 +16,7 @@ class Main {
         },
         /**Reads configurations from the file */
         read: () => {
-            this.#_verbose = configs?.verbose === true;
+            this.#_verbose = this.#_configFile?.verbose === true;
 
             if (utils.is.undefined(configs) || !utils.is.realObject(configs)) { throw new Error(`The ${constants.PACKAGE_NAME}'s "${constants.CONFIG_FILE_NAME}" is either missing or invalid`) }
             this.#_helpers.print('Reading config file...');
