@@ -147,10 +147,11 @@ class Main {
                             if (!p2.endsWith('.js') && !p2.startsWith('.') && !p2.startsWith('/')) {
                                 return match;  // Skip non-relative imports
                             }
-                            if (!p2.endsWith('.js')) {
-                                return `${p1}${p2}.js${p3}`;
+                            const lastPart = p2.split('/').pop();
+                            if (lastPart.includes('.') && lastPart.split('.').length > 1) {
+                                return match; // Skip if last part already has an extension
                             }
-                            return match;
+                            return `${p1}${p2}.js${p3}`;
                         });
                         fs.writeFileSync(fullPath, content, 'utf8');
                     }
