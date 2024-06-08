@@ -171,8 +171,35 @@ class Main {
                     }
                 }
             }
-        }
+        },
+        create: {
+            pkgESM: () => {
+                const content = JSON.stringify({
+                    "type": "module"
+                }, null, 4);
 
+                this.#_helpers.create.write(this.#_config.esmDir, content);
+            },
+            pkgCJS: () => {
+                const content = JSON.stringify({
+                    "type": "commonjs"
+                }, null, 4);
+
+                this.#_helpers.create.write(this.#_config.cjsDir, content);
+            },
+            write: (dir, content) => {
+                fs.writeFileSync(path.join(dir, 'package.json'), content, { encoding: 'utf-8' });
+            },
+            packages: () => {
+                if (this.#_config.esmDir) {
+                    this.#_helpers.create.pkgESM();
+                }
+
+                if (this.#_config.cjsDir) {
+                    this.#_helpers.create.pkgCJS();
+                }
+            }
+        }
     }
 
     run() {
