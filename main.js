@@ -172,6 +172,7 @@ class Main {
         },
         create: {
             pkgESM: () => {
+                this.#_helpers.print('Creating package.json for "ESM"...');
                 const content = JSON.stringify({
                     "type": "module"
                 }, null, 4);
@@ -179,6 +180,7 @@ class Main {
                 this.#_helpers.create.write(this.#_config.esmDir, content);
             },
             pkgCJS: () => {
+                this.#_helpers.print('Creating package.json for "CJS"...');
                 const content = JSON.stringify({
                     "type": "commonjs"
                 }, null, 4);
