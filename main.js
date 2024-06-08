@@ -96,6 +96,25 @@ class Main {
             }
         },
         copy: {
+            helpers: {
+                addJsonImportAssertions(dir) {
+                    fs.readdirSync(dir).forEach(file => {
+                        const fullPath = path.join(dir, file);
+                        if (fs.lstatSync(fullPath).isDirectory()) {
+                            addJsonImportAssertions(fullPath);
+                        } else if (file.endsWith('.js') || file.endsWith('.mjs')) {
+                            let content = fs.readFileSync(fullPath, 'utf8');
+                            content = content.replace(/import\s+(.*?)\s+from\s+(['"])(.*?)\.json\2\s*;/g, (match, imports, quote, modulePath) => {
+                                if (!imports.includes('assert')) {
+                                    return `import ${imports} from ${quote}${modulePath}.json${quote} assert { type: "json" };`;
+                                }
+                                return match;
+                            });
+                            fs.writeFileSync(fullPath, content, 'utf8');
+                        }
+                    });
+                }
+            },
             exclude: ['.ts'],
             folderContent: (from, to, exclude) => {
                 if (!fs.existsSync(to)) { fs.mkdirSync(to, { recursive: true }) }
@@ -125,6 +144,7 @@ class Main {
                         if (this.#_config.esmDir) {
                             this.#_helpers.print('Copying files to ESM...');
                             this.#_helpers.copy.directory(from, path.join(constants.ROOT, constants.ESM_REL_PATH), exclude);
+                            this.#_helpers.copy.helpers.addJsonImportAssertions(this.#_config.esmDir);
                         }
 
                         if (this.#_config.cjsDir) {
