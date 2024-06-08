@@ -18,11 +18,11 @@ class Main {
         read: () => {
             this.#_verbose = this.#_configFile?.verbose === true;
 
-            if (utils.is.undefined(configs) || !utils.is.realObject(configs)) { throw new Error(`The ${constants.PACKAGE_NAME}'s "${constants.CONFIG_FILE_NAME}" is either missing or invalid`) }
+            if (utils.is.undefined(this.#_configFile) || !utils.is.realObject(this.#_configFile)) { throw new Error(`The ${constants.PACKAGE_NAME}'s "${constants.CONFIG_FILE_NAME}" is either missing or invalid`) }
             this.#_helpers.print('Reading config file...');
 
             try {
-                if ('esmDir' in configs) {
+                if ('esmDir' in this.#_configFile) {
                     if (this.#_configFile.esmDir === 'auto') {
                         this.#_config.esmDir = path.join(constants.ROOT, constants.ESM_REL_PATH);
                     } else {
@@ -35,7 +35,7 @@ class Main {
                     }
                 }
 
-                if ('cjsDir' in configs) {
+                if ('cjsDir' in this.#_configFile) {
                     if (this.#_configFile.cjsDir === 'auto') {
                         this.#_config.cjsDir = path.join(constants.ROOT, constants.CJS_REL_PATH)
                     } else {
@@ -48,7 +48,7 @@ class Main {
                     }
                 }
 
-                if ('copyFiles' in configs) {
+                if ('copyFiles' in this.#_configFile) {
                     if (utils.is.undefined(this.#_configFile.copyFiles) || !utils.is.realObject(this.#_configFile.copyFiles)) { throw new Error(`The provided "copyFiles" must be a real object`) }
 
                     this.#_config.copyFiles = { exclude: [], from: '' };
@@ -81,7 +81,7 @@ class Main {
 
                 }
 
-                if ('addExtensions' in configs) {
+                if ('addExtensions' in this.#_configFile) {
                     if (typeof this.#_configFile.addExtensions !== 'boolean') { throw new Error(`The "addExtensions" option is expecting a boolean value, instead got ${typeof this.#_configFile.addExtensions}`) }
                     this.#_config.addExtensions = this.#_configFile.addExtensions;
                 } else {
