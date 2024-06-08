@@ -74,9 +74,9 @@ class Main {
                     if ('from' in this.#_configFile.copyFiles) {
                         if (!utils.is.validString(this.#_configFile.copyFiles.from)) { throw new Error(`The "copyFiles.from" expecting a string but instead got ${typeof this.#_configFile.copyFiles.from}`) }
                         if (!fs.existsSync(path.resolve(this.#_configFile.copyFiles.from))) { throw new Error(`The "copyFiles.from" directory (${this.#_configFile.copyFiles.from}) does not exist`) }
-                        this.#_config.copyFiles.from = this.#_configFile.copyFiles.from;
+                        this.#_config.copyFiles.from = path.resolve(this.#_configFile.copyFiles.from);
                     } else {
-                        this.#_config.copyFiles.from = path.join(constants.ROOT, 'src');
+                        this.#_config.copyFiles.from = path.resolve('./src');
                     }
 
                 }
@@ -202,7 +202,7 @@ class Main {
         },
         config: {
             check: () => {
-                const configPath = path.join(process.cwd(), constants.CONFIG_FILE_NAME);
+                const configPath = path.resolve(constants.CONFIG_FILE_NAME);
                 if (!fs.existsSync(configPath)) { throw new Error(`The ${constants.PACKAGE_NAME}'s config file is missing.`) }
                 const str_configs = fs.readFileSync(configPath, { encoding: 'utf-8' });
                 try {

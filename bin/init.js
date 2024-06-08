@@ -9,7 +9,7 @@ const configs = {
     cjsDir: "auto",
     verbose: true,
     copyFiles: {
-        from: path.join(constants.ROOT, 'src'),
+        from: './src',
         exclude: ['.js']
     },
     addExtensions: true
