@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import constants from '../constants';
+import constants from '../constants.js';
 
 const configs = {
     esmDir: "auto",

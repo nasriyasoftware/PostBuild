@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
-import utils from './utils/utils';
-import constants from './constants';
+import utils from './utils/utils.js';
+import constants from './constants.js';
 
 const configPath = path.join(process.cwd(), constants.CONFIG_FILE_NAME);
 const configs = await import(configPath);
