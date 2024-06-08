@@ -1,0 +1,43 @@
+{
+  "name": "@nasriya/postbuild",
+  "version": "0.0.1",
+  "description": "A package that does some tasks after compilation",
+  "main": "main.js",
+  "type": "module",
+  "bin": {
+    "postbuild-init": "./bin/init.js",
+    "postbuild": "./bin/run.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nasriyasoftware/PostBuild.git"
+  },
+  "maintainers": [
+    {
+      "name": "Ahmad Nasriya",
+      "email": "ahmad@nasriya.net",
+      "url": "https://www.linkedin.com/in/ahmadnasriya/"
+    }
+  ],
+  "keywords": [
+    "TypeScript",
+    "TSC",
+    "Babel",
+    "NodeJS",
+    "CommonJS",
+    "ESM",
+    "EcmaScript"
+  ],
+  "author": "Nasriya Software, LLC.",
+  "license": "Nasriya License",
+  "bugs": {
+    "url": "https://github.com/nasriyasoftware/PostBuild/issues"
+  },
+  "homepage": "https://github.com/nasriyasoftware/PostBuild#readme",
+  "devDependencies": {
+    "@types/node": "^20.14.2"
+  }
+}
