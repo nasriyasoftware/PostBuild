@@ -5,8 +5,8 @@
   "main": "main.js",
   "type": "module",
   "bin": {
-    "postbuild-init": "./src/bin/init.js",
-    "postbuild": "./src/bin/run.js"
+    "postbuild-init": "./bin/init.js",
+    "postbuild": "./bin/run.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
