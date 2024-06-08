@@ -97,11 +97,11 @@ class Main {
         },
         copy: {
             helpers: {
-                addJsonImportAssertions(dir) {
+                addJsonImportAssertions: (dir) => {
                     fs.readdirSync(dir).forEach(file => {
                         const fullPath = path.join(dir, file);
                         if (fs.lstatSync(fullPath).isDirectory()) {
-                            addJsonImportAssertions(fullPath);
+                            this.#_helpers.copy.helpers.addJsonImportAssertions(fullPath);
                         } else if (file.endsWith('.js') || file.endsWith('.mjs')) {
                             let content = fs.readFileSync(fullPath, 'utf8');
                             content = content.replace(/import\s+(.*?)\s+from\s+(['"])(.*?)\.json\2\s*;/g, (match, imports, quote, modulePath) => {

@@ -1,6 +1,6 @@
 {
   "name": "@nasriya/postbuild",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A package that does some tasks after compilation",
   "main": "main.js",
   "type": "module",
