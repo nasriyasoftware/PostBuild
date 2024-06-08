@@ -3,11 +3,9 @@ import fs from 'fs';
 import utils from './utils/utils.js';
 import constants from './constants.js';
 
-const configPath = path.join(process.cwd(), constants.CONFIG_FILE_NAME);
-const configs = await import(configPath);
-
 class Main {
     #_verbose = false;
+    #_configFile = {}
     #_config = {}
 
     #_helpers = {
@@ -25,10 +23,10 @@ class Main {
 
             try {
                 if ('esmDir' in configs) {
-                    if (configs.esmDir === 'auto') {
+                    if (this.#_configFile.esmDir === 'auto') {
                         this.#_config.esmDir = path.join(constants.ROOT, constants.ESM_REL_PATH);
                     } else {
-                        const fullPath = path.resolve(configs.esmDir)
+                        const fullPath = path.resolve(this.#_configFile.esmDir)
                         if (fs.existsSync(fullPath)) {
                             this.#_config.esmDir = fullPath;
                         } else {
@@ -38,10 +36,10 @@ class Main {
                 }
 
                 if ('cjsDir' in configs) {
-                    if (configs.cjsDir === 'auto') {
+                    if (this.#_configFile.cjsDir === 'auto') {
                         this.#_config.cjsDir = path.join(constants.ROOT, constants.CJS_REL_PATH)
                     } else {
-                        const fullPath = path.resolve(configs.cjsDir)
+                        const fullPath = path.resolve(this.#_configFile.cjsDir)
                         if (fs.existsSync(fullPath)) {
                             this.#_config.cjsDir = fullPath;
                         } else {
@@ -51,12 +49,12 @@ class Main {
                 }
 
                 if ('copyFiles' in configs) {
-                    if (utils.is.undefined(configs.copyFiles) || !utils.is.realObject(configs.copyFiles)) { throw new Error(`The provided "copyFiles" must be a real object`) }
+                    if (utils.is.undefined(this.#_configFile.copyFiles) || !utils.is.realObject(this.#_configFile.copyFiles)) { throw new Error(`The provided "copyFiles" must be a real object`) }
 
                     this.#_config.copyFiles = { exclude: [], from: '' };
-                    if ('exclude' in configs.copyFiles) {
-                        if (Array.isArray(configs.copyFiles.exclude)) {
-                            for (const inc of configs.copyFiles.exclude) {
+                    if ('exclude' in this.#_configFile.copyFiles) {
+                        if (Array.isArray(this.#_configFile.copyFiles.exclude)) {
+                            for (const inc of this.#_configFile.copyFiles.exclude) {
                                 if (utils.is.validString(inc)) {
                                     if (!inc.startsWith('.')) { throw new Error(`The "copyFiles.exclude" should include files extensions in this format: ".ts". ${inc} is not a valid extension format.`) }
                                     continue;
@@ -65,18 +63,18 @@ class Main {
                                 }
                             }
 
-                            this.#_config.copyFiles.exclude = ['.ts'].concat(configs.copyFiles.exclude);
+                            this.#_config.copyFiles.exclude = ['.ts'].concat(this.#_configFile.copyFiles.exclude);
                         } else {
-                            throw new Error(`The "copyFiles.exclude" is expecting an array of strings, instead got ${typeof configs.copyFiles.exclude}`)
+                            throw new Error(`The "copyFiles.exclude" is expecting an array of strings, instead got ${typeof this.#_configFile.copyFiles.exclude}`)
                         }
                     } else {
-                        configs.copyFiles.exclude = ['.ts'];
+                        this.#_configFile.copyFiles.exclude = ['.ts'];
                     }
 
-                    if ('from' in configs.copyFiles) {
-                        if (!utils.is.validString(configs.copyFiles.from)) { throw new Error(`The "copyFiles.from" expecting a string but instead got ${typeof configs.copyFiles.from}`) }
-                        if (!fs.existsSync(path.resolve(configs.copyFiles.from))) { throw new Error(`The "copyFiles.from" directory (${configs.copyFiles.from}) does not exist`) }
-                        this.#_config.copyFiles.from = configs.copyFiles.from;
+                    if ('from' in this.#_configFile.copyFiles) {
+                        if (!utils.is.validString(this.#_configFile.copyFiles.from)) { throw new Error(`The "copyFiles.from" expecting a string but instead got ${typeof this.#_configFile.copyFiles.from}`) }
+                        if (!fs.existsSync(path.resolve(this.#_configFile.copyFiles.from))) { throw new Error(`The "copyFiles.from" directory (${this.#_configFile.copyFiles.from}) does not exist`) }
+                        this.#_config.copyFiles.from = this.#_configFile.copyFiles.from;
                     } else {
                         this.#_config.copyFiles.from = path.join(constants.ROOT, 'src');
                     }
@@ -84,14 +82,14 @@ class Main {
                 }
 
                 if ('addExtensions' in configs) {
-                    if (typeof configs.addExtensions !== 'boolean') { throw new Error(`The "addExtensions" option is expecting a boolean value, instead got ${typeof configs.addExtensions}`) }
-                    this.#_config.addExtensions = configs.addExtensions;
+                    if (typeof this.#_configFile.addExtensions !== 'boolean') { throw new Error(`The "addExtensions" option is expecting a boolean value, instead got ${typeof this.#_configFile.addExtensions}`) }
+                    this.#_config.addExtensions = this.#_configFile.addExtensions;
                 } else {
                     this.#_config.addExtensions = false;
                 }
             } catch (error) {
                 if (error instanceof Error) {
-                    error.message = `Unable to read postbuild.configs.json: ${error.message}`;
+                    error.message = `Unable to read postbuild.this.#_configFile.json: ${error.message}`;
                 }
 
                 throw error;
@@ -199,12 +197,25 @@ class Main {
                     this.#_helpers.create.pkgCJS();
                 }
             }
+        },
+        config: {
+            check: () => {
+                const configPath = path.join(process.cwd(), constants.CONFIG_FILE_NAME);
+                if (!fs.existsSync(configPath)) { throw new Error(`The ${constants.PACKAGE_NAME}'s config file is missing.`) }
+                const str_configs = fs.readFileSync(configPath, { encoding: 'utf-8' });
+                try {
+                    this.#_configFile = JSON.parse(str_configs);
+                } catch (error) {
+                    throw new Error(`The ${constants.PACKAGE_NAME}'s config file is not a valid JSON file.`)
+                }
+            }
         }
     }
 
     run() {
         const st = performance.now();
 
+        this.#_helpers.config.check();
         this.#_helpers.read();
         this.#_helpers.copy.run();
         this.#_helpers.extensions.run();
