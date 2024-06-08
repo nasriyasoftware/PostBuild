@@ -216,6 +216,7 @@ class Main {
         const st = performance.now();
 
         this.#_helpers.config.check();
+        this.#_helpers.create.packages();
         this.#_helpers.read();
         this.#_helpers.copy.run();
         this.#_helpers.extensions.run();
