@@ -64,6 +64,25 @@ The best way to use this package is to integrate it with your build process by a
     }
 }
 ```
+
+**Note:**
+All `__dirname` matches in `ESM` will be replaced with `import.meta.dirname`, for example:
+
+```ts
+// TypeScript
+const dirname: string = __dirname;
+```
+
+Will be compiled to:
+```js
+// CommonJS (CJS)
+const dirname = __dirname;
+```
+
+```js
+// ECMAScript Modules (ESM)
+const dirname = import.meta.dirname;
+```
 ___
 ## License
 Please read the license from [here](https://github.com/nasriyasoftware/PostBuild?tab=License-1-ov-file).
