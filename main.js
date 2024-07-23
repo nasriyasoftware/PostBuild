@@ -360,7 +360,7 @@ class Main {
                 });
             },
             check: () => {
-                if (!utils.is.realObject(this.#_helpers.aliases)) { return }
+                if (!(utils.is.realObject(this.#_config.aliases) && Object.keys(this.#_config.aliases))) { return }
                 const aliasPatterns = this.#_helpers.aliases.getPatterns();
                 if (this.#_config.esmDir) {
                     this.#_helpers.aliases.processFiles(this.#_config.esmDir, aliasPatterns);
