@@ -87,9 +87,23 @@ class Main {
                 } else {
                     this.#_config.addExtensions = false;
                 }
+
+                if ('aliases' in this.#_configFile) {
+                    const aliases = this.#_configFile.aliases;
+                    if (!utils.is.realObject(aliases)) { throw new Error(`The "aliases" option is expecting a real object, isntead got ${typeof aliases}`) }
+
+                    this.#_config.aliases = {}
+                    for (const prop in aliases) {
+                        if (typeof aliases[prop] === 'string') {
+                            this.#_config.aliases[prop] = aliases[prop];
+                        } else {
+                            throw new TypeError(`One of the defined aliases (${aliases[prop]}) is not a string`)
+                        }
+                    }
+                }
             } catch (error) {
                 if (error instanceof Error) {
-                    error.message = `Unable to read postbuild.this.#_configFile.json: ${error.message}`;
+                    error.message = `Unable to read postbuild configFile: ${error.message}`;
                 }
 
                 throw error;
@@ -263,6 +277,98 @@ class Main {
                     fs.writeFileSync(fullPath, content, 'utf8');
                 }
             });
+        },
+        aliases: {
+            regex: {
+                /**
+                 * Create a regular expression for catching imports
+                 * @param {string} pattern 
+                 * @returns {RegExp}
+                 */
+                createCatch: (pattern) => {
+                    const escapedPattern = pattern.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&').replace(/\*/g, '.*');
+                    return new RegExp(`^${escapedPattern}$`)
+                },
+                /**
+                 * Create a regular expression for catching imports
+                 * @param {string} pattern 
+                 * @returns {RegExp}
+                 */
+                createExact: (pattern) => {
+                    const escapedPattern = pattern.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
+                    return new RegExp(`^${escapedPattern}`)
+                }
+            },
+            getPatterns: () => {
+                const aliases = this.#_config.aliases;
+                return Object.keys(aliases).map(alias => {
+                    const catchPattern = this.#_helpers.aliases.regex.createCatch(alias);
+                    const exactPattern = this.#_helpers.aliases.regex.createExact(alias);
+
+                    return {
+                        alias,
+                        catchPattern,
+                        exactPattern,
+                        resolvedPath: aliases[alias]
+                    };
+                });
+            },
+            matchImportPath: (importPath, aliasPatterns) => {
+                for (const { catchPattern, exactPattern, resolvedPath } of aliasPatterns) {
+                    // Check if the import path starts with the alias pattern
+                    const match = importPath.match(catchPattern);
+                    if (match) {
+                        const newMatch = match[0].replace(exactPattern, resolvedPath)
+                        const newImportPath = importPath.replace(match[0], newMatch);
+
+                        // Construct the new path by combining the resolved path with the remaining path
+                        return importPath.replace(match, newImportPath)
+                    }
+                }
+
+                return importPath; // No match found
+            },
+            replaceImports: (filePath, aliasPatterns) => {
+                let fileContent = fs.readFileSync(filePath, 'utf8');
+
+                // Replace import paths based on alias patterns
+                fileContent = fileContent.replace(/from ['"]([^'"]+)['"]/g, (match, importPath) => {
+                    // Match the import path against alias patterns
+                    const resolvedPath = this.#_helpers.aliases.matchImportPath(importPath, aliasPatterns);
+
+                    // Only replace if the alias was matched, else return the original import path
+                    if (resolvedPath !== importPath) {
+                        // Preserve the specific path segments after the alias
+                        const remainingPath = importPath.replace(/^.*\/[^\/]+/, ''); // Strip alias part
+                        return `from '${resolvedPath}${remainingPath}${remainingPath.endsWith('.js') ? '' : '.js'}'`;
+                    }
+
+                    return match; // No change if alias was not matched
+                });
+
+                fs.writeFileSync(filePath, fileContent, 'utf8');
+            },
+            processFiles: (directory, aliasPatterns) => {
+                fs.readdirSync(directory).forEach(file => {
+                    const fullPath = path.join(directory, file);
+
+                    if (fs.lstatSync(fullPath).isDirectory()) {
+                        this.#_helpers.aliases.processFiles(fullPath, aliasPatterns);
+                    } else if (file.endsWith('.js')) {
+                        this.#_helpers.aliases.replaceImports(fullPath, aliasPatterns);
+                    }
+                });
+            },
+            check: () => {
+                const aliasPatterns = this.#_helpers.aliases.getPatterns();
+                if (this.#_config.esmDir) {
+                    this.#_helpers.aliases.processFiles(this.#_config.esmDir, aliasPatterns);
+                }
+
+                if (this.#_config.cjsDir) {
+                    this.#_helpers.aliases.processFiles(this.#_config.cjsDir, aliasPatterns);
+                }
+            }
         }
     }
 
@@ -274,10 +380,11 @@ class Main {
         this.#_helpers.create.packages();
         this.#_helpers.copy.run();
         this.#_helpers.extensions.run();
+        this.#_helpers.aliases.check();
 
         const et = Date.now();
         const duration = et - st;
-        this.#_helpers.print(`PostBuild finishes in ${duration} milliseconds`);
+        this.#_helpers.print(`PostBuild finished in ${duration} milliseconds`);
     }
 }
 

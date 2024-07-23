@@ -3,7 +3,7 @@
 [![Static Badge](https://img.shields.io/badge/license-Free_(Restricted)-blue)](https://github.com/nasriyasoftware/PostBuild?tab=License-1-ov-file) ![Repository Size](https://img.shields.io/github/repo-size/nasriyasoftware/PostBuild.svg) ![Last Commit](https://img.shields.io/github/last-commit/nasriyasoftware/PostBuild.svg) [![Status](https://img.shields.io/badge/Status-Stable-green.svg)](link-to-your-status-page)
 ##### Visit us at [www.nasriya.net](https://nasriya.net).
 
-PostBuild is a utility pacakge for **TypeScript** run useful tasks after transpiling TypeScript into **ESM** and **CJS** JavaScript file.
+PostBuild is a utility pacakge for **TypeScript** that runs useful tasks after transpiling TypeScript into **ESM** and **CJS** JavaScript file.
 
 Made with ❤️ in **Palestine** 🇵🇸
 ___
@@ -25,15 +25,16 @@ npm run postbuild-init
 ##### Config File Content
 The above comand will generate a file with all the features set to their recommended values. This table below explains them in details.
 
-| Property            | Description                                                              | Posible values          | Default value |
-| ------------------- | ------------------------------------------------------------------------ | ----------------------- | ------------- |
-| `esmDir`            | The directory of the generated `ESM` folder.                             | `auto` or the directory | `auto`        |
-| `cjsDir`            | The directory of the generated `CJS` folder.                             | `auto` or the directory | `auto`        |
-| `verbose`           | An option to enable logging extra details .                              | `true` or `false`       | `true`        |
-| `addExtensions`     | Appending `.js` to all import statements.                                | `true` or `false`       | `true`        |
-| `copyFiles`         | An options object to copy assets to the `dist` folder after transpiling. | `object` or `undefined` | Notice below  |
-| `copyFiles.from`    | The directory where you want to copy the assets to.                      | directory               | `src`         |
-| `copyFiles.exclude` | An array of file extensions to exclude.                                  | `string[]`              | `['.ts']`     |
+| Property            | Description                                                              | Posible values           | Default value |
+| ------------------- | ------------------------------------------------------------------------ | ------------------------ | ------------- |
+| `esmDir`            | The directory of the generated `ESM` folder.                             | `auto` or the directory  | `auto`        |
+| `cjsDir`            | The directory of the generated `CJS` folder.                             | `auto` or the directory  | `auto`        |
+| `verbose`           | An option to enable logging extra details .                              | `true` or `false`        | `true`        |
+| `addExtensions`     | Appending `.js` to all import statements.                                | `true` or `false`        | `true`        |
+| `copyFiles`         | An options object to copy assets to the `dist` folder after transpiling. | `object` or `undefined`  | Notice below  |
+| `copyFiles.from`    | The directory where you want to copy the assets to.                      | directory                | `src`         |
+| `copyFiles.exclude` | An array of file extensions to exclude.                                  | `string[]`               | `['.ts']`     |
+| `aliases`           | Define aliases to your imports                                           | `Record<string, string>` | Nothing       |
 
 The default configurations works well if your project is structured like this:
 ```
@@ -65,7 +66,19 @@ The best way to use this package is to integrate it with your build process by a
 }
 ```
 
-**Note:**
+#### Defining aliases
+In `postbuild.config.json`, you can add your aliases as such:
+
+```json
+{
+    "aliases": {
+        "my-module": "/modules/my-module",
+        "@elements/*": "/elements/"
+    }
+}
+```
+
+#### Using `__dirname`
 All `__dirname` matches in `ESM` will be replaced with `import.meta.dirname`, for example:
 
 ```ts
