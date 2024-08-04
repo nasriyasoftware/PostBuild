@@ -160,16 +160,16 @@ class Main {
                     } else if (file.endsWith('.js')) {
                         let content = fs.readFileSync(fullPath, 'utf8');
 
-                        // Regex to match import statements
-                        content = content.replace(/(import\s+.*\s+from\s+['"])(.*)(['"];)/g, (match, p1, p2, p3) => {
-                            if (!p2.endsWith('.js') && !p2.startsWith('.') && !p2.startsWith('/')) {
-                                return match;  // Skip non-relative imports
+                        // Regex to match import statements with or without named import
+                        content = content.replace(/(import\s+((\w+|\{\s*.*\s*})\s+from\s+['"])(.*)(['"];))/g, (match, p1, p2, p3, p4, p5) => {
+                            // Skip if already has an extension or is not relative
+                            if (!p4.endsWith('.js') && (p4.startsWith('.') || p4.startsWith('/'))) {
+                                const lastPart = p4.split('/').pop();
+                                if (!lastPart.includes('.') || lastPart.split('.').length === 1) {
+                                    return `${p1.slice(0, -p5.length)}${p4}.js${p5}`;
+                                }
                             }
-                            const lastPart = p2.split('/').pop();
-                            if (lastPart.includes('.') && lastPart.split('.').length > 1) {
-                                return match; // Skip if last part already has an extension
-                            }
-                            return `${p1}${p2}.js${p3}`;
+                            return match;
                         });
 
                         // Regex to match export statements
