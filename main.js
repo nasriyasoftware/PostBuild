@@ -160,14 +160,13 @@ class Main {
                     } else if (file.endsWith('.js')) {
                         let content = fs.readFileSync(fullPath, 'utf8');
 
-                        // Regex to match import statements with or without named import
-                        content = content.replace(/(import\s+((\w+|\{\s*.*\s*})\s+from\s+['"])(.*)(['"];))/g, (match, p1, p2, p3, p4, p5) => {
-                            // Skip if already has an extension or is not relative
-                            if (!p4.endsWith('.js') && (p4.startsWith('.') || p4.startsWith('/'))) {
-                                const lastPart = p4.split('/').pop();
-                                if (!lastPart.includes('.') || lastPart.split('.').length === 1) {
-                                    return `${p1.slice(0, -p5.length)}${p4}.js${p5}`;
-                                }
+                        // Regex to match import statements with relative paths
+                        content = content.replace(/import\s+(?:[\w{}\s,*]+)?\s*(?:\w+)?(?:\s+from\s+)?['"](\.\/.*?|\.\.\/.*?)(['"])/g, (match, p1, p2, p3) => {
+                            // Only modify relative paths that don't already end with '.js'
+                            if (!p1.endsWith('.js') && (p1.startsWith('./') || p1.startsWith('../'))) {
+                                // Construct the new import statement
+                                const start = match.substring(0, match.indexOf(p1));
+                                return `${start}${p1}.js${p2}`;
                             }
                             return match;
                         });
